@@ -31,6 +31,13 @@ router.get('/', async (req, res, next) => {
       conditions.push('variant_type IS NULL');
     }
 
+    if (req.query.search) {
+      params.push(req.query.search);
+      conditions.push(
+        `search_vector @@ websearch_to_tsquery('english', $${params.length})`
+      );
+    }
+
     const where = conditions.length > 0
       ? `WHERE ${conditions.join(' AND ')}`
       : '';
@@ -57,7 +64,7 @@ router.get('/', async (req, res, next) => {
     const totalPages = Math.ceil(total / limit);
 
     res.json({
-      data: dataResult.rows,
+      data: dataResult.rows.map(({ search_vector, ...card }) => card),
       pagination: { page, limit, total, totalPages },
     });
   } catch (err) {
