@@ -87,6 +87,10 @@ async function runSync() {
         const card      = transformCard(raw, setId);
         // const lookupKey = raw.metadata?.clean_name || raw.name;
         const lookupKey = extractBaseName(raw.metadata?.clean_name || raw.name);
+
+        const candidates = [...baseCardIndex.keys()].filter(k => k.includes('Seal'));
+        console.log(`[debug] Lookup "${lookupKey}" — candidates:`, candidates);
+
         const baseCard  = baseCardIndex.get(`${lookupKey}|${setId}`);
 
         if (!baseCard) {
