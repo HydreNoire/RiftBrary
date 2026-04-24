@@ -6,6 +6,7 @@ const express = require('express');
 const router = express.Router();
 
 const cardsRouter = require('./cards');
+const adminRouter = require('./admin');
 // Phase 1+  : const setsRouter    = require('./sets');
 // Phase 2+  : const decksRouter   = require('./decks');
 // Phase 3+  : const usersRouter   = require('./users');
@@ -21,6 +22,7 @@ router.get('/health', async (req, res) => {
 });
 
 router.use('/cards', cardsRouter);
+router.use('/admin', adminRouter);
 // router.use('/sets',       setsRouter);
 // router.use('/decks',      decksRouter);
 // router.use('/users',      usersRouter);
