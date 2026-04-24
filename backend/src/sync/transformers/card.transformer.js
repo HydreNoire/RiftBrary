@@ -1,6 +1,5 @@
 // src/sync/transformers/card.transformer.js
-// Transforme la réponse brute de l'API Riftcodex vers la forme
-// attendue par notre schéma PostgreSQL.
+// Transforme la réponse brute de l'API Riftcodex vers le format attendue de notre BDD PostgreSQL.
 //
 // Exemple de carte brute (Riftcodex) :
 // {
@@ -23,7 +22,7 @@ const CATEGORY_MAP = {
   champion:    'champion',
   legend:      'legend',
   spell:       'spell',
-  gear:        'item',    // L'API dit "Gear", notre schéma dit "item"
+  gear:        'item',    
   item:        'item',
   rune:        'rune',
   battlefield: 'battlefield',
@@ -79,8 +78,7 @@ function transformCard(raw, setId) {
     // ── Champs table cards ────────────────────────────────────────────────
     cardNumber,
     setId,
-    // Le slug inclut le card_number pour garantir l'unicité même si
-    // deux cartes de sets différents ont le même nom (ex: reprints)
+    // Le slug inclut le card_number pour garantir l'unicité même si deux cartes de sets différents ont le même nom (ex: reprints)
     slug: slugify(`${raw.name}-${cardNumber}`),
     name: raw.name || '',
     category,
@@ -100,7 +98,6 @@ function transformCard(raw, setId) {
     domainCodes: (raw.classification?.domain || []).map((d) => d.toLowerCase()),
 
     // Tags → champion_tags (régions Runeterra, champions...)
-    // Le slug est généré de la même façon que les slugs de champion_tags
     tagSlugs: (raw.tags || []).map((t) => slugify(t)),
     tagNames: raw.tags || [],
 
@@ -113,7 +110,7 @@ function transformCard(raw, setId) {
     isVariant,
     variantType,
     // Clé pour retrouver la carte de base lors de l'import d'une variante
-    baseMatchKey: { name: raw.name, setId },
+    baseMatchKey: { name: raw.metadata?.clean_name || raw.name, setId },
   };
 }
 

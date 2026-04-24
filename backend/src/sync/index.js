@@ -70,7 +70,8 @@ async function runSync() {
         const card   = transformCard(raw, setId);
         const result = await importCard(card, domainMap);
 
-        baseCardIndex.set(`${card.name}|${setId}`, { id: result.id });
+        const indexKey = raw.metadata?.clean_name || raw.name;
+        baseCardIndex.set(`${indexKey}|${setId}`, { id: result.id });
 
         if (result.action === 'inserted') stats.inserted++;
         else stats.updated++;
@@ -83,11 +84,13 @@ async function runSync() {
     // ── Passe 2 : import des variantes ─────────────────────────────────
     for (const raw of variantCards) {
       try {
-        const card     = transformCard(raw, setId);
-        const baseCard = baseCardIndex.get(`${card.name}|${setId}`);
+        const card      = transformCard(raw, setId);
+        // const lookupKey = raw.metadata?.clean_name || raw.name;
+        const lookupKey = extractBaseName(raw.metadata?.clean_name || raw.name);
+        const baseCard  = baseCardIndex.get(`${lookupKey}|${setId}`);
 
         if (!baseCard) {
-          console.warn(`[sync] Variante "${raw.name}" sans carte de base trouvée — skipped`);
+          console.warn(`[sync] Variante "${raw.name}" (clean: ${raw.metadata?.clean_name}) sans carte de base — skipped`);
           stats.skipped++;
           continue;
         }
@@ -117,6 +120,17 @@ function isVariant(raw) {
   return raw.metadata?.alternate_art === true
       || raw.metadata?.overnumbered  === true
       || raw.metadata?.signature     === true;
+}
+
+/**
+ * Supprime les suffixes de variante du clean_name pour retrouver le nom de base.
+ * Cela permet de ne pas skip l'ajout des cartes dans la BDD
+ * "Fury Rune Alternate Art" → "Fury Rune"
+ */
+function extractBaseName(cleanName) {
+  return cleanName
+    .replace(/\s+(Alternate Art|Overnumbered|Signature Stamp|Signature|Full Art)$/i, '')
+    .trim();
 }
 
 module.exports = { runSync };

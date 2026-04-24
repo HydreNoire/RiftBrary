@@ -1,9 +1,7 @@
 // src/sync/importers/card.importer.js
-// Contient toute la logique d'UPSERT vers PostgreSQL.
-// Chaque carte est importée dans une transaction — si une étape échoue
-// (ex: insertion des domains), la carte entière est rollback.
+// Contient la logique d'UPSERT vers PostgreSQL
 
-const db = require('../db');
+const db = require('../../db');
 
 /**
  * Charge les lookup tables (domains et sets) depuis la BDD.
@@ -27,10 +25,6 @@ async function loadLookupMaps() {
 /**
  * Importe (UPSERT) une carte de base et toutes ses relations.
  * Si la carte existe déjà (même set_id + card_number), elle est mise à jour.
- *
- * Utilise une transaction par carte :
- *   BEGIN → upsert card → delete/insert relations → COMMIT
- *   En cas d'erreur → ROLLBACK sur cette carte uniquement
  *
  * @param {Object} card      - Carte transformée (depuis card.transformer.js)
  * @param {Map}    domainMap - Map { domainCode → domainId }
@@ -158,8 +152,7 @@ async function importVariant(card, baseCard) {
     `INSERT INTO card_variants (base_card_id, variant_type, collector_number, image_url)
      VALUES ($1, $2, $3, $4)
      ON CONFLICT (base_card_id, variant_type, collector_number) DO UPDATE SET
-       image_url  = EXCLUDED.image_url,
-       updated_at = NOW()`,
+       image_url  = EXCLUDED.image_url`,
     [baseCard.id, card.variantType, card.cardNumber, card.imageUrl]
   );
 }

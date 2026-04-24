@@ -1,8 +1,7 @@
 // src/sync/sources/riftcodex.js
 // Adaptateur pour l'API Riftcodex (https://api.riftcodex.com)
-// Gratuite, sans auth, disponible maintenant.
 //
-// Quand la clé Riot officielle sera approuvée, on créera un fichier
+// A modifier quand la clé Riot officielle sera approuvée, on créera un fichier
 // src/sync/sources/riot.js avec la même interface (fetchCardsBySet / fetchSets)
 // et on changera juste l'import dans sync/index.js — rien d'autre à toucher.
 
@@ -32,18 +31,21 @@ async function fetchCardsBySet(setCode) {
 
     const data = await res.json();
 
-    // L'API retourne [] quand il n'y a plus de résultats
-    if (!Array.isArray(data) || data.length === 0) break;
+    const items = data.items || [];
+    const totalPages = data.pages || 1;
 
-    allCards.push(...data);
-    console.log(`[riftcodex]   Page ${page} — ${data.length} cartes (total: ${allCards.length})`);
+    if (items.length === 0) break;
+
+    allCards.push(...items);
+    console.log(`[riftcodex]   Page ${page}/${totalPages} — ${items.length} cartes (total: ${allCards.length})`);
+
+    if (page >= totalPages) break;
 
     // Si on a reçu moins que PAGE_SIZE, c'est la dernière page
     if (data.length < PAGE_SIZE) break;
 
     page++;
 
-    // Petite pause entre les pages pour ne pas abuser de l'API
     await sleep(200);
   }
 
