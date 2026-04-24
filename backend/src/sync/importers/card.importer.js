@@ -62,7 +62,7 @@ async function importCard(card, domainMap, baseCardIndex = new Map()) {
         image_url, artist, is_token, riot_card_id, last_synced_at,
         variant_type, base_card_id
       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
-      ON CONFLICT (set_id, card_number) DO UPDATE SET
+      ON CONFLICT (set_id, card_number, variant_type) DO UPDATE SET
         slug           = EXCLUDED.slug,
         name           = EXCLUDED.name,
         category       = EXCLUDED.category,
