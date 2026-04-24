@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rifbound Library</title>
+  <link rel="stylesheet" href="assets/css/main.css" />
+
+  <script>
+    window.ENV = {
+      API_URL: ['localhost', '127.0.0.1'].includes(window.location.hostname) 
+                || window.location.hostname.startsWith('192.168.')
+        ? 'http://localhost:3001/api'
+        : 'https://rifbound-api.onrender.com/api',
+    };
+  </script>
+</head>
+<body>
+  <header>
+    <h1>Rifbound TCG</h1>
+  </header>
+
+  <main>
+    <p>Site en construction.</p>
+    <div id="api-status">Vérification de la connexion à l'API...</div>
+  </main>
+
+  <script src="assets/js/api.js"></script>
+  <script>
+    // — à retirer une fois le dev lancé
+    (async () => {
+      const { data, error } = await rifboundApi.health.check();
+      const el = document.getElementById('api-status');
+      if (error) {
+        el.textContent = `API inaccessible : ${error}`;
+        el.style.color = 'red';
+      } else {
+        el.textContent = `API connectée — ${data.service} (${data.timestamp})`;
+        el.style.color = 'green';
+      }
+    })();
+  </script>
+</body>
+</html>

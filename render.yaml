@@ -1,0 +1,38 @@
+# render.yaml — Configuration de déploiement pour Render.com
+# Ce fichier doit être à la racine du repo (ou dans /backend si rootDir est défini).
+# Render le détecte automatiquement lors de la connexion du repo.
+
+services:
+  - type: web
+    name: rifbound-api
+    env: node
+    # Frankfurt = le plus proche pour un projet EU
+    region: frankfurt
+    plan: free
+    # Si ton repo est un monorepo (frontend + backend) :
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    # Render arrête le service après 15 min d'inactivité sur le free tier.
+    # Le "cold start" prend ~30 secondes. Acceptable pour un projet perso.
+    # Pour éviter ça : utilise un cron Render ou un ping externe (UptimeRobot).
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Les variables suivantes sont à renseigner manuellement dans le dashboard Render
+      # (Settings → Environment) ou via le CLI Render.
+      # Ne jamais mettre de vraies valeurs dans ce fichier !
+      - key: DATABASE_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
+      - key: RIOT_API_KEY
+        sync: false
+      - key: CORS_ORIGIN
+        # Remplace par ton vrai domaine Vercel après le premier déploiement
+        value: https://rifbound.vercel.app

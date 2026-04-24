@@ -1,0 +1,23 @@
+# ─── Node ────────────────────────────────────────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-error.log
+
+# ─── Environnement ───────────────────────────────────────────────────────────
+# NA PAS committer les .env (contiennent clés API, mots de passe BDD, etc.)
+.env
+.env.local
+.env.production
+.env.*.local
+
+# ─── Vercel ──────────────────────────────────────────────────────────────────
+.vercel/
+
+# ─── OS ──────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ─── Éditeurs ────────────────────────────────────────────────────────────────
+.vscode/settings.json
+.idea/
+*.swp
