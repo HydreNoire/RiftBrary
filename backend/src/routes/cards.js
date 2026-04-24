@@ -3,15 +3,15 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+const cache = require('../cache');
 
 // ─── GET /api/cards ───────────────────────────────────────────────────────────
 router.get('/', async (req, res, next) => {
   try {
-    const page  = Math.max(1, parseInt(req.query.page)  || 1);
+    const page = Math.max(1, parseInt(req.query.page)  || 1);
     const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
     const offset = (page - 1) * limit;
 
-    // ── Construction du WHERE dynamique ──────────────────────────────────────
     const conditions = [];
     const params = [];
 
@@ -21,52 +21,56 @@ router.get('/', async (req, res, next) => {
     };
 
     if (req.query.set) add(`set->>'code' = ?`, req.query.set.toUpperCase());
-    if (req.query.category) add('category = ?', req.query.category.toLowerCase());
-    if (req.query.rarity) add('rarity = ?', req.query.rarity.toLowerCase());
-    if (req.query.cost) add('energy_cost = ?', parseInt(req.query.cost));
-    if (req.query.variant_type) add('variant_type = ?', req.query.variant_type.toLowerCase());
-
+    if (req.query.category) add('category = ?',      req.query.category.toLowerCase());
+    if (req.query.rarity) add('rarity = ?',        req.query.rarity.toLowerCase());
+    if (req.query.cost) add('energy_cost = ?',   parseInt(req.query.cost));
     if (req.query.variant_type === 'base') {
-      conditions.pop(); params.pop(); 
       conditions.push('variant_type IS NULL');
+    } else if (req.query.variant_type) {
+      add('variant_type = ?', req.query.variant_type.toLowerCase());
     }
-
     if (req.query.search) {
       params.push(req.query.search);
-      conditions.push(
-        `search_vector @@ websearch_to_tsquery('english', $${params.length})`
-      );
+      conditions.push(`search_vector @@ websearch_to_tsquery('english', $${params.length})`);
     }
 
-    const where = conditions.length > 0
-      ? `WHERE ${conditions.join(' AND ')}`
-      : '';
+    const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+    const hasFilters = conditions.length > 0 || page > 1 || limit !== 20;
+    const CACHE_KEY = 'cards:default';
 
-    // ── Requêtes data + count en parallèle ───────────────────────────────────
-    const dataParams  = [...params, limit, offset];
-    const countParams = [...params];
+    // ── Cache hit ─────────────────────────────────────────────────────────────
+    if (!hasFilters) {
+      const cached = cache.get(CACHE_KEY);
+      if (cached) {
+        res.set('Cache-Control', 'public, max-age=300');
+        res.set('X-Cache', 'HIT');
+        return res.json(cached);
+      }
+    }
 
+    // ── Requêtes BDD ──────────────────────────────────────────────────────────
     const [dataResult, countResult] = await Promise.all([
       db.query(
-        `SELECT * FROM cards_full
-         ${where}
+        `SELECT * FROM cards_full ${where}
          ORDER BY set->>'code', card_number
          LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
-        dataParams
+        [...params, limit, offset]
       ),
-      db.query(
-        `SELECT COUNT(*) FROM cards_full ${where}`,
-        countParams
-      ),
+      db.query(`SELECT COUNT(*) FROM cards_full ${where}`, params),
     ]);
 
-    const total = parseInt(countResult.rows[0].count);
+    const total      = parseInt(countResult.rows[0].count);
     const totalPages = Math.ceil(total / limit);
-
-    res.json({
+    const payload    = {
       data: dataResult.rows.map(({ search_vector, ...card }) => card),
       pagination: { page, limit, total, totalPages },
-    });
+    };
+
+    if (!hasFilters) cache.set(CACHE_KEY, payload);
+
+    res.set('Cache-Control', hasFilters ? 'no-store' : 'public, max-age=300');
+    res.set('X-Cache', 'MISS');
+    res.json(payload);
   } catch (err) {
     next(err);
   }

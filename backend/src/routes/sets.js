@@ -1,18 +1,25 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+const cache = require('../cache');
 
 // ─── GET /api/sets ────────────────────────────────────────────────────────────
 router.get('/', async (req, res, next) => {
   try {
+    const CACHE_KEY = 'sets:list';
+    const cached = cache.get(CACHE_KEY);
+
+    if (cached) {
+      res.set('Cache-Control', 'public, max-age=300');
+      res.set('X-Cache', 'HIT');
+      return res.json(cached);
+    }
+
     const result = await db.query(`
       SELECT
-        s.id,
-        s.code,
-        s.name,
-        s.release_date_en,
-        COUNT(c.id)                                          AS total_cards,
-        COUNT(c.id) FILTER (WHERE c.variant_type IS NULL)    AS base_cards,
+        s.id, s.code, s.name, s.release_date_en,
+        COUNT(c.id) AS total_cards,
+        COUNT(c.id) FILTER (WHERE c.variant_type IS NULL) AS base_cards,
         COUNT(c.id) FILTER (WHERE c.variant_type IS NOT NULL) AS variant_cards
       FROM sets s
       LEFT JOIN cards c ON c.set_id = s.id AND c.is_token = false
@@ -20,7 +27,12 @@ router.get('/', async (req, res, next) => {
       ORDER BY s.release_date_en ASC
     `);
 
-    res.json({ data: result.rows });
+    const payload = { data: result.rows };
+    cache.set(CACHE_KEY, payload);
+
+    res.set('Cache-Control', 'public, max-age=300');
+    res.set('X-Cache', 'MISS');
+    res.json(payload);
   } catch (err) {
     next(err);
   }

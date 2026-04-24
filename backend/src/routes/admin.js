@@ -1,6 +1,5 @@
 // src/routes/admin.js
 // Routes d'administration — uniquement accessibles avec le header X-Sync-Secret.
-// Auth basique suffisante pour l'instant (Phase 3 ajoutera un vrai système d'auth).
 //
 // Endpoint disponible :
 //   POST /api/admin/sync  → Lance le sync Riftbound
@@ -8,6 +7,7 @@
 const express   = require('express');
 const router    = express.Router();
 const { runSync } = require('../sync');
+const cache = require('../cache');
 
 // Middleware de protection : vérifie le header X-Sync-Secret
 // Ajoute SYNC_SECRET dans ton .env (une chaîne aléatoire, genre un UUID)
@@ -41,6 +41,10 @@ router.post('/sync', async (req, res, next) => {
   try {
     console.log('[admin] Sync déclenché manuellement');
     const result = await runSync();
+
+    cache.flushAll();
+    console.log('[cache] Cache invalidé après sync');
+
     res.json({ success: true, result });
   } catch (err) {
     next(err);
