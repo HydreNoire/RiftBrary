@@ -6,13 +6,10 @@ const express = require('express');
 const router = express.Router();
 
 const cardsRouter = require('./cards');
+const setsRouter = require('./sets');
 const adminRouter = require('./admin');
-// Phase 1+  : const setsRouter    = require('./sets');
-// Phase 2+  : const decksRouter   = require('./decks');
-// Phase 3+  : const usersRouter   = require('./users');
-// Phase 3+  : const collectRouter = require('./collection');
 
-// Health check — utilisé par Render pour vérifier que le service est vivant
+// Health check — utilisé par Render pour vérifier la dispo du service
 router.get('/health', async (req, res) => {
   res.json({
     status: 'ok',
@@ -22,10 +19,7 @@ router.get('/health', async (req, res) => {
 });
 
 router.use('/cards', cardsRouter);
+router.use('/sets', setsRouter);
 router.use('/admin', adminRouter);
-// router.use('/sets',       setsRouter);
-// router.use('/decks',      decksRouter);
-// router.use('/users',      usersRouter);
-// router.use('/collection', collectRouter);
 
 module.exports = router;
