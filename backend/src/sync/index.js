@@ -6,9 +6,10 @@
 // il suffit de changer la ligne d'import ci-dessous :
 // const source = require('./sources/riot');
 
-const source      = require('./sources/riftcodex');
+const source = require('./sources/riftcodex');
+const db = require('../db');
 const { transformCard } = require('./transformers/card.transformer');
-const { importCard, importVariant, loadLookupMaps } = require('./importers/card.importer');
+const { importCard, loadLookupMaps } = require('./importers/card.importer');
 
 // Sets à synchroniser : { setCode BDD → setCode Riftcodex }
 // Le setCode BDD est la colonne `code` de notre table sets.
@@ -16,7 +17,7 @@ const { importCard, importVariant, loadLookupMaps } = require('./importers/card.
 // TODO : rendre cette config dynamique (lire depuis la table sets)
 const SETS_TO_SYNC = [
   { dbCode: 'OGN', sourceCode: 'ogn' },
-  { dbCode: 'UNL', sourceCode: 'unl' }, // À confirmer — code Unleashed
+  { dbCode: 'UNL', sourceCode: 'unl' },
   { dbCode: 'SFD', sourceCode: 'sfd' },
 ];
 
@@ -35,6 +36,7 @@ async function runSync() {
   // Charge les lookup maps une seule fois pour tout le sync
   const { domainMap, setMap } = await loadLookupMaps();
   console.log(`[sync] ${domainMap.size} domaines, ${setMap.size} sets chargés`);
+  const baseCardIndex = new Map(); 
 
   for (const { dbCode, sourceCode } of SETS_TO_SYNC) {
     const setId = setMap.get(dbCode.toUpperCase());
@@ -61,52 +63,26 @@ async function runSync() {
     const baseCards    = rawCards.filter((c) => !isVariant(c));
     const variantCards = rawCards.filter((c) =>  isVariant(c));
 
-    // ── Passe 1 : import des cartes de base ────────────────────────────
-    // On construit aussi un index name → {id} pour lier les variantes ensuite
-    const baseCardIndex = new Map(); // key: "Card Name|setId" → { id }
+    console.log(`[sync] Set ${dbCode} — ${rawCards.length} cartes à traiter`);
 
-    for (const raw of baseCards) {
+    for (const raw of rawCards) {
       try {
         const card   = transformCard(raw, setId);
-        const result = await importCard(card, domainMap);
+        const result = await importCard(card, domainMap, baseCardIndex);
 
         const indexKey = raw.metadata?.clean_name || raw.name;
         baseCardIndex.set(`${indexKey}|${setId}`, { id: result.id });
+        baseCardIndex.set(`${card.name}|${setId}`, { id: result.id });
 
         if (result.action === 'inserted') stats.inserted++;
         else stats.updated++;
       } catch (err) {
-        console.error(`[sync] Erreur carte ${raw.riftbound_id} :`, err.message);
+        console.error(`[sync] Erreur carte ${raw.riftbound_id} — ${err.message}`);
         stats.errors.push({ card: raw.riftbound_id, error: err.message });
       }
     }
 
-    // ── Passe 2 : import des variantes ─────────────────────────────────
-    for (const raw of variantCards) {
-      try {
-        const card      = transformCard(raw, setId);
-        // const lookupKey = raw.metadata?.clean_name || raw.name;
-        const lookupKey = extractBaseName(raw.metadata?.clean_name || raw.name);
-
-        const candidates = [...baseCardIndex.keys()].filter(k => k.includes('Seal'));
-        console.log(`[debug] Lookup "${lookupKey}" — candidates:`, candidates);
-
-        const baseCard  = baseCardIndex.get(`${lookupKey}|${setId}`);
-
-        if (!baseCard) {
-          console.warn(`[sync] Variante "${raw.name}" (clean: ${raw.metadata?.clean_name}) sans carte de base — skipped`);
-          stats.skipped++;
-          continue;
-        }
-
-        await importVariant(card, baseCard);
-        stats.inserted++;
-      } catch (err) {
-        console.error(`[sync] Erreur variante ${raw.riftbound_id} :`, err.message);
-        stats.errors.push({ card: raw.riftbound_id, error: err.message });
-      }
-    }
-
+    console.log(`[sync] Set ${dbCode} terminé — ${rawCards.length} cartes traitées`);
     console.log(`[sync] Set ${dbCode} terminé — base: ${baseCards.length}, variantes: ${variantCards.length}`);
   }
 

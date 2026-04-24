@@ -35,6 +35,7 @@ const RARITY_MAP = {
   rare:         'rare',
   epic:         'epic',
   overnumbered: 'overnumbered',
+  showcase:     'showcase',
 };
 
 /**
@@ -106,11 +107,10 @@ function transformCard(raw, setId) {
       ? { domainCode: powerDomainCode, amount: powerAmount }
       : null,
 
-    // ── Variante ──────────────────────────────────────────────────────────
-    isVariant,
-    variantType,
-    // Clé pour retrouver la carte de base lors de l'import d'une variante
-    baseMatchKey: { name: raw.metadata?.clean_name || raw.name, setId },
+    // ── Variants ──────────────────────────────────────────────────────────
+    isVariant: isVariant,
+    variantType: variantType,
+    baseMatchKey: raw.metadata?.clean_name || raw.name,
   };
 }
 
