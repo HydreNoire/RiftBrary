@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 64" width="240" height="64" fill="none">
+  
+  <g transform="translate(10,8)">
+    <rect x="0" y="0" width="36" height="48" rx="4" fill="none" stroke="#D9B347" stroke-width="2"></rect>
+    <circle cx="18" cy="24" r="5.5" fill="none" stroke="#D9B347" stroke-width="2"></circle>
+    <circle cx="18" cy="24" r="2" fill="#D9B347"></circle>
+  </g>
+
+  
+  <g transform="translate(62,0)" font-family="&#39;Cinzel&#39;, &#39;Beaufort for LOL&#39;, Georgia, serif" fill="#F5F0E1">
+    <text x="0" y="34" font-size="26" font-weight="800" letter-spacing="2">RIFT</text>
+    <text x="68" y="34" font-size="26" font-weight="700" letter-spacing="2" fill="#D9B347">BRARY</text>
+    <text x="0" y="52" font-family="&#39;Unbounded&#39;, &#39;Inter Tight&#39;, sans-serif" font-size="7" font-weight="700" letter-spacing="3" fill="#8B92A7">FAN COMPANION · RIFTBOUND TCG</text>
+  </g>
+</svg>
