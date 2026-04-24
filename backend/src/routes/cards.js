@@ -1,60 +1,55 @@
 // src/routes/cards.js
-// Route placeholder pour la bibliothèque de cartes.
-// La logique complète (filtres, full-text search, join sets) sera développée en Phase 1.
-// Pour l'instant : structure de réponse cohérente + health check de la BDD.
 
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
 
-/**
- * GET /api/cards
- * Liste paginée des cartes. Paramètres query supportés (Phase 1) :
- *   - page    : numéro de page (défaut 1)
- *   - limit   : résultats par page (défaut 20, max 100)
- *   - type    : filtrer par type de carte
- *   - set     : filtrer par set
- *   - search  : recherche full-text sur le nom
- */
+// ─── GET /api/cards ───────────────────────────────────────────────────────────
 router.get('/', async (req, res, next) => {
   try {
-    const page = Math.max(1, Number(req.query.page) || 1);
-    const limit = Math.min(100, Math.max(1, Number(req.query.limit) || 20));
+    const page = Math.max(1, parseInt(req.query.page)  || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
     const offset = (page - 1) * limit;
 
-    // TODO Phase 1 : construire la vraie requête avec filtres dynamiques
-    // Pour l'instant on vérifie juste que la BDD répond
-    const result = await db.query(
-      'SELECT COUNT(*) as total FROM information_schema.tables WHERE table_schema = $1',
-      ['public']
-    );
+    const [dataResult, countResult] = await Promise.all([
+      db.query(
+        `SELECT * FROM cards_full
+         ORDER BY set->>'code', card_number
+         LIMIT $1 OFFSET $2`,
+        [limit, offset]
+      ),
+      db.query(`SELECT COUNT(*) FROM cards_full`),
+    ]);
+
+    const total = parseInt(countResult.rows[0].count);
+    const totalPages = Math.ceil(total / limit);
 
     res.json({
-      data: [],
-      pagination: {
-        page,
-        limit,
-        offset,
-        total: 0,
-        totalPages: 0,
-      },
-      _dev: `BDD accessible — ${result.rows[0].total} tables dans le schéma public`,
+      data: dataResult.rows,
+      pagination: { page, limit, total, totalPages },
     });
   } catch (err) {
     next(err);
   }
 });
 
-/**
- * GET /api/cards/:id
- * Détail d'une carte par son ID ou son slug.
- * Implémentation complète en Phase 1.
- */
+// ─── GET /api/cards/:id ───────────────────────────────────────────────────────
 router.get('/:id', async (req, res, next) => {
   try {
     const { id } = req.params;
-    // TODO Phase 1
-    res.json({ data: null, _dev: `Carte ${id} — endpoint à implémenter en Phase 1` });
+
+    // Accepte un ID numérique ou un slug texte
+    const isNumeric = /^\d+$/.test(id);
+    const result = await db.query(
+      `SELECT * FROM cards_full WHERE ${isNumeric ? 'id = $1' : 'slug = $1'}`,
+      [isNumeric ? parseInt(id) : id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: { message: `Carte introuvable : ${id}` } });
+    }
+
+    res.json({ data: result.rows[0] });
   } catch (err) {
     next(err);
   }
