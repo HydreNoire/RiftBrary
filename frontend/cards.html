@@ -4,12 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Unbounded:wght@400;500;600&family=Inter+Tight:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
     <link rel="stylesheet" href="./assets/css/main.css">
+    <link rel="stylesheet" href="./assets/css/cards.css">
     <link rel="shortcut icon" href="./assets/img/favicon.ico" type="image/x-icon">
 
     <title>RiftBrary - Cards</title>
 </head>
-<body style="background: #0E1018; color: white;">
+<body>
     <header>
         <img src="./assets/img/logo-riftbrary.svg" alt="logo">
         <nav>
@@ -20,15 +25,45 @@
             <a href="./learn.html"> Apprendre</a>
         </nav>
 
-        <div>
-            <div id="profile_icon"></div>
+        <div id="profile_login_register">
+            <div id="profile_icon">Profile</div>
         </div>
     </header>
 
     <div id="page_layout">
-        <aside id="filters_container"></aside>
+        <aside id="filters_container">
+            <div id="domains">
+                <h4>DOMAINES</h4>
+            </div>
 
-        <main id="cards_container"></main>
+            <div id="rarity">
+                <h4>RARETE</h4>
+            </div>
+
+            <div id="type">
+                <h4>TYPE</h4>
+            </div>
+
+            <div id="result_count"></div>
+        </aside>
+
+        <main id="cards_search_container">
+            <div id="search_container">
+                <div id="searchbar">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="search_input" placeholder="Recherche une carte, un champion...">
+                </div>
+
+                <h5>Trier :</h5>
+                <select id="sort_by">
+                    <option value="cost">Coût</option>
+                    <option value="name">Nom</option>
+                    <option value="rarity">Rareté</option>
+                </select>
+            </div>
+            
+            <div id="cards_container"></div>
+        </main>
     </div>
 </body>
 </html>

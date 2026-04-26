@@ -1,0 +1,67 @@
+:root {
+    --bg-primary: #0E1018;
+    --sidebar-width: 280px;
+    --navbar-height: 64px;
+    --search-height: 56px;
+    --font-display: 'Cinzel', 'Times New Roman', serif;
+    --font-accent: 'Unbounded', system-ui, sans-serif;
+    --font-ui: 'Inter Tight', 'Helvetica Neue', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+#page_layout {
+    display: flex;
+    /* height: calc(100vh - var(--navbar-height)); */
+    height: 2500px;
+    margin: 0 8rem;
+    border: 2px solid red;
+}
+
+aside {
+    flex-shrink: 0;
+    position: sticky;
+    top: 2rem;
+    height: fit-content;
+    overflow-y: auto;
+    width: var(--sidebar-width);
+
+    border: 2px solid gold;
+}
+
+#cards_search_container {
+    flex: 1;
+    overflow-y: auto;
+    padding-left: 2rem;
+}
+
+#search_container {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    position: sticky;
+    top: 2rem;
+    overflow-y: auto;
+    height: var(--search-height);
+    width: 100%;
+}
+
+#searchbar {
+    width: 90%;
+}
+
+#searchbar i {
+    font-size: .7rem;
+    margin-right: .5rem;
+}
+
+#searchbar input {
+    background: transparent;
+    border: none;
+    color: white;
+    height: calc(var(--search-height) - 12px);
+    width: 95%;
+}
+
+#searchbar input:focus, #searchbar input:active {
+    outline: none;
+}

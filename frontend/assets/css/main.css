@@ -1,0 +1,36 @@
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --bg-primary: #0E1018;
+    --sidebar-width: 280px;
+    --navbar-height: 64px;
+    --font-display: 'Cinzel', 'Times New Roman', serif;
+    --font-accent: 'Unbounded', system-ui, sans-serif;
+    --font-ui: 'Inter Tight', 'Helvetica Neue', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+body {
+    background: var(--bg-primary);
+    color: white;
+    font-family: sans-serif;
+    min-height: 100vh;
+}
+
+header {
+    height: var(--navbar-height);
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 3rem;
+    padding: 48px 48px;
+    font-family: var(--font-accent);
+}
+
+#profile_login_register {
+    margin-left: auto;
+}
