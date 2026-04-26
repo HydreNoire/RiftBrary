@@ -35,6 +35,14 @@ async function apiFetch(endpoint, opts = {}) {
   }
 }
 
+// ─── Health ───────────────────────────────────────────────────────────────────
+// Use for debug purpose on api status
+const health = {
+  check() {
+    return apiFetch('/health');
+  },
+};
+
 // ─── Cards ───────────────────────────────────────────────────────────────────
 
 const cards = {
@@ -55,15 +63,14 @@ const cards = {
   },
 };
 
-// ─── Health ───────────────────────────────────────────────────────────────────
-
-const health = {
-  check() {
-    return apiFetch('/health');
-  },
-};
+// ─── Sets ───────────────────────────────────────────────────────────────────
+const sets = {
+  getAll() {
+    return apiFetch('/sets');
+  }
+}
 
 // ─── Export ───────────────────────────────────────────────────────────────────
 // Sera étendu avec decks, collection, auth 
 
-window.rifboundApi = { cards, health };
+window.rifboundApi = { health, cards, sets };
