@@ -21,8 +21,24 @@ aside {
     top: 1.5rem;
     height: fit-content;
     overflow-y: auto;
+    overflow-x: hidden;
     width: var(--sidebar-width);
     padding: 18px 24px;
+}
+
+#pills_domains_container, #pills_rarity_container, #pills_types_container, #pills_sets_container {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.pill {
+    cursor: pointer;
+    padding: 8px 4px;
+    border: 1px solid gray;
+    margin: 4px;
 }
 
 #cards_search_container {

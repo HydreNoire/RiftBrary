@@ -1,16 +1,41 @@
-// ─── Card Load ───────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
-    const {data, error} = await rifboundApi.cards.getAll();
+    await renderFilters();
+    fetchAndRender();
+    
+    // Management of buffers and filters for fetching
+    document.getElementById('filters_container').addEventListener('click', (e) => {
+        const pill = e.target.closest('.pill');
+        if (!pill) return;
+        
+        const filter = pill.dataset.filter;
+        const value = pill.dataset.value;
+        
+        const index = activeFilters[filter].indexOf(value);
+        if (index > -1) {
+            activeFilters[filter].splice(index, 1);
+            pill.classList.remove('active');
+        } else {
+            activeFilters[filter].push(value);
+            pill.classList.add('active');
+        }
 
-    if (error) {
-        console.log('{Cards} Erreur :', error)
-    }
-
-    renderFilters();
-    renderCards(data.data);
-
+        fetchAndRender();
+    })
 });
 
+// ─── Fetch filters and render Cards ─────────────────────────────────────────────────
+async function fetchAndRender() {
+    const { data, error } = await rifboundApi.cards.getAll(activeFilters);
+
+    if (error) {
+      console.error('[cards] Erreur :', error);
+      return;
+    }   
+
+    renderCards(data.data);
+}
+
+// ─── Card Render ───────────────────────────────────────────────────────────────────
 function renderCard(card) {
     let cardString = `<div class="card">
     <img src="${card.image_url}" alt="cardimg" style="object-fit: cover; width: 100%; display: block; aspect-ratio: 2/3;">
@@ -32,15 +57,15 @@ function renderCards(cards) {
 // ─── Pills generator ─────────────────────────────────────────────────────────────────
 const FILTERS = {
     rarity: ['common', 'uncommon', 'rare', 'epic', 'showcase'],
-    types: ['unit', 'spell', 'equipment', 'landmark'],
+    type: ['unit', 'spell', 'equipment', 'landmark'],
     domains: ['Fury', 'Calm', 'Mind', 'Body', 'Chaos', 'Order'],
 }
 
 const activeFilters = {
-    rarity: null,
-    types: null,
-    domains: null,
-    set: null,
+    rarity: [],
+    type: [],
+    domains: [],
+    set: [],
 }
 
 async function renderFilters() {
@@ -50,7 +75,7 @@ async function renderFilters() {
         .join('');
 
     const typeContainer = document.getElementById('pills_types_container');
-    typeContainer.innerHTML = FILTERS.types
+    typeContainer.innerHTML = FILTERS.type
         .map(type => `<span class="pill" data-filter="type" data-value="${type}">${type}</span>`)
         .join('');
 
