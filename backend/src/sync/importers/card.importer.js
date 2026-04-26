@@ -26,8 +26,8 @@ async function loadLookupMaps() {
  * Importe (UPSERT) une carte de base et toutes ses relations.
  * Si la carte existe déjà (même set_id + card_number), elle est mise à jour.
  *
- * @param {Object} card      - Carte transformée (depuis card.transformer.js)
- * @param {Map}    domainMap - Map { domainCode → domainId }
+ * @param {Object} card 
+ * @param {Map} domainMap
  * @returns {{ id: number, action: 'inserted' | 'updated' }}
  */
 async function importCard(card, domainMap, baseCardIndex = new Map()) {
@@ -94,7 +94,74 @@ async function importCard(card, domainMap, baseCardIndex = new Map()) {
     const cardId = upsertResult.rows[0].id;
     const isNew  = upsertResult.rows[0].is_new;
 
-    // ... reste du code (domains, power costs, tags) inchangé ...
+    // ── Domains ───────────────────────────────────────────────────────────
+    await client.query('DELETE FROM card_domains WHERE card_id = $1', [cardId]);
+
+    for (const code of card.domainCodes) {
+      const domainId = domainMap.get(code);
+      if (!domainId) {
+        console.warn(`[import] domaine inconnu ignoré : "${code}" (carte: ${card.name})`);
+        continue;
+      }
+      await client.query(
+        'INSERT INTO card_domains (card_id, domain_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+        [cardId, domainId]
+      );
+    }
+
+    // ── Power costs ───────────────────────────────────────────────────────
+    await client.query('DELETE FROM card_power_costs WHERE card_id = $1', [cardId]);
+
+    if (card.powerCost) {
+      const domainId = domainMap.get(card.powerCost.domainCode);
+      if (domainId) {
+        await client.query(
+          `INSERT INTO card_power_costs (card_id, domain_id, amount)
+          VALUES ($1, $2, $3)
+          ON CONFLICT DO NOTHING`,
+          [cardId, domainId, card.powerCost.amount]
+        );
+      } else {
+        console.warn(`[import] domaine power_cost inconnu : "${card.powerCost.domainCode}" (carte: ${card.name})`);
+      }
+    }
+
+    // ── Keywords ──────────────────────────────────────────────────────────────
+    await client.query('DELETE FROM card_keywords WHERE card_id = $1', [cardId]);
+
+    for (const kwName of (card.keywords || [])) {
+      const kwResult = await client.query(
+        `INSERT INTO keywords (name, description)
+        VALUES ($1, $2)
+        ON CONFLICT (name) DO UPDATE SET name = EXCLUDED.name
+        RETURNING id`,
+        [kwName, 'À documenter']
+      );
+      await client.query(
+        'INSERT INTO card_keywords (card_id, keyword_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+        [cardId, kwResult.rows[0].id]
+      );
+    }
+
+    // ── Champion tags ──────────────────────────────────────────────────────────
+    await client.query('DELETE FROM card_champion_tags WHERE card_id = $1', [cardId]);
+
+    for (let i = 0; i < (card.tagSlugs || []).length; i++) {
+      const slug = card.tagSlugs[i];
+      const name = card.tagNames[i];
+
+      const tagResult = await client.query(
+        `INSERT INTO champion_tags (slug, name)
+        VALUES ($1, $2)
+        ON CONFLICT (slug) DO UPDATE SET name = EXCLUDED.name
+        RETURNING id`,
+        [slug, name]
+      );
+      await client.query(
+        'INSERT INTO card_champion_tags (card_id, champion_tag_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+        [cardId, tagResult.rows[0].id]
+      );
+    }
 
     await client.query('COMMIT');
     return { id: cardId, action: isNew ? 'inserted' : 'updated' };

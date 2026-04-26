@@ -6,7 +6,7 @@ const API_BASE_URL = window.ENV?.API_URL || 'http://localhost:3001/api';
 
 /**
  * Wrapper fetch avec gestion d'erreurs centralisée.
- * Retourne toujours { data, error } — jamais de throw dans les composants.
+ * Retourne toujours { data, error }
  *
  * @param {string} endpoint  - Ex : '/cards', '/cards/123', '/decks'
  * @param {RequestInit} opts - Options fetch optionnelles
@@ -64,6 +64,6 @@ const health = {
 };
 
 // ─── Export ───────────────────────────────────────────────────────────────────
-// Sera étendu avec decks, collection, auth au fil des phases.
+// Sera étendu avec decks, collection, auth 
 
 window.rifboundApi = { cards, health };

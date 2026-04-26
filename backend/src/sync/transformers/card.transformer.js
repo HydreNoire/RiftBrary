@@ -79,8 +79,11 @@ function transformCard(raw, setId) {
     // ── Champs table cards ────────────────────────────────────────────────
     cardNumber,
     setId,
-    // Le slug inclut le card_number pour garantir l'unicité même si deux cartes de sets différents ont le même nom (ex: reprints)
-    slug: slugify(`${raw.name}-${cardNumber}`),
+    slug: slugify(
+      variantType 
+        ? `${raw.name}-${setCode}-${num}-${variantType}`
+        : `${raw.name}-${setCode}-${num}`
+    ),
     name: raw.name || '',
     category,
     rarity,
@@ -107,11 +110,27 @@ function transformCard(raw, setId) {
       ? { domainCode: powerDomainCode, amount: powerAmount }
       : null,
 
-    // ── Variants ──────────────────────────────────────────────────────────
+    keywords: extractKeywords(raw.text?.plain || ''),
+
     isVariant: isVariant,
     variantType: variantType,
     baseMatchKey: raw.metadata?.clean_name || raw.name,
   };
+}
+
+/**
+ * Extrait les mots-clés entre crochets depuis le texte d'effet.
+ * "[Assault 3] blah [Deathknell]" → ["Assault", "Deathknell"]
+ * On garde uniquement le premier mot entre crochets pour ignorer
+ * les numéros (ex: "Assault 3" → "Assault")
+ */
+function extractKeywords(abilityText) {
+  const matches = abilityText.match(/\[([^\]]+)\]/g) || [];
+  return [...new Set(
+    matches
+      .map((m) => m.replace(/[\[\]]/g, '').split(' ')[0].trim())
+      .filter((k) => k.length > 0)
+  )];
 }
 
 /**
@@ -129,4 +148,4 @@ function slugify(str) {
     .replace(/-+/g, '-');              // Tirets multiples → un seul
 }
 
-module.exports = { transformCard, slugify };
+module.exports = { transformCard, slugify, extractKeywords };
