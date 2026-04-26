@@ -2,7 +2,7 @@
     --bg-primary: #0E1018;
     --sidebar-width: 280px;
     --navbar-height: 64px;
-    --search-height: 56px;
+    --search-height: 82px;
     --font-display: 'Cinzel', 'Times New Roman', serif;
     --font-accent: 'Unbounded', system-ui, sans-serif;
     --font-ui: 'Inter Tight', 'Helvetica Neue', system-ui, sans-serif;
@@ -11,14 +11,14 @@
 
 #page_layout {
     display: flex;
-    height: calc(100vh - var(--navbar-height));
+    /* height: calc(100vh - var(--navbar-height)); */
     margin: 0 8rem;
 }
 
 aside {
     flex-shrink: 0;
     position: sticky;
-    top: 2rem;
+    top: 1.5rem;
     height: fit-content;
     overflow-y: auto;
     width: var(--sidebar-width);
@@ -34,11 +34,15 @@ aside {
 
 #search_container {
     display: flex;
-    justify-content: flex-start;
+    justify-content: center;
     align-items: center;
     flex-shrink: 0;
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    background-color: rgba(14, 16, 24, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.125);
     position: sticky;
-    top: 2rem;
+    top: 1.5rem;
     overflow-y: auto;
     height: var(--search-height);
     width: 100%;
@@ -69,6 +73,14 @@ aside {
     flex: 1;
     overflow-y: auto;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    grid-auto-rows: auto;
     gap: 16px;
+}
+
+.card {
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  color: white;
 }
