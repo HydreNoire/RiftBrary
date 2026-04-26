@@ -1,7 +1,6 @@
 // assets/js/api.js
 // Client API centralisé pour communiquer avec le backend Rifbound.
 // Toutes les requêtes vers l'API passent par ce module — pas de fetch() direct
-// dispersés dans les pages.
 
 const API_BASE_URL = window.ENV?.API_URL || 'http://localhost:3001/api';
 

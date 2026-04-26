@@ -11,10 +11,8 @@
 
 #page_layout {
     display: flex;
-    /* height: calc(100vh - var(--navbar-height)); */
-    height: 2500px;
+    height: calc(100vh - var(--navbar-height));
     margin: 0 8rem;
-    border: 2px solid red;
 }
 
 aside {
@@ -24,20 +22,21 @@ aside {
     height: fit-content;
     overflow-y: auto;
     width: var(--sidebar-width);
-
-    border: 2px solid gold;
+    padding: 18px 24px;
 }
 
 #cards_search_container {
     flex: 1;
-    overflow-y: auto;
     padding-left: 2rem;
+    display: flex;
+    flex-direction: column;
 }
 
 #search_container {
     display: flex;
     justify-content: flex-start;
     align-items: center;
+    flex-shrink: 0;
     position: sticky;
     top: 2rem;
     overflow-y: auto;
@@ -64,4 +63,12 @@ aside {
 
 #searchbar input:focus, #searchbar input:active {
     outline: none;
+}
+
+#cards_container {
+    flex: 1;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
 }
