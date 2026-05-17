@@ -51,17 +51,11 @@ const cards = {
    * @param {{ page?, limit?, type?, set?, search? }} params
    */
   getAll(params = {}) {
-    // const qs = new URLSearchParams(
-    //   Object.entries(params).filter(([, v]) => v !== undefined && v !== '')
-    // ).toString();
-    // return apiFetch(`/cards${qs ? `?${qs}` : ''}`);
 
     const qs = new URLSearchParams();
 
     Object.entries(params).forEach(([key, value]) => {
       if (Array.isArray(value)) {
-        // ✅ Fix bug 3 : chaque valeur du tableau = un param séparé
-        // ?rarity=common&rarity=rare au lieu de ?rarity=common,rare
         value.forEach(v => qs.append(key, v));
       } else if (value !== undefined && value !== '') {
         qs.set(key, value);

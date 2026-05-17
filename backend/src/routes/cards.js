@@ -55,7 +55,7 @@ router.get('/', async (req, res, next) => {
     }
     if (req.query.search) {
       params.push(req.query.search);
-      conditions.push(`search_vector @@ websearch_to_tsquery('english', $${params.length})`);
+      conditions.push(`search_vector @@ to_tsquery('english', $${params.length} || ':*')`);
     }
 
     const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';

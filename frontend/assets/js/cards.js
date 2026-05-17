@@ -23,6 +23,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         fetchAndRender();
     })
+
+    let debounceTimer = null;
+
+    document.getElementById('search_input').addEventListener('input', (e) => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        activeFilters.search = e.target.value.trim();
+        fetchAndRender();
+      }, 300);
+    });
 });
 
 // ─── Fetch filters and render Cards ─────────────────────────────────────────────────
@@ -69,6 +79,7 @@ const activeFilters = {
     type: [],
     domain: [],
     set: [],
+    search: '',
 }
 
 async function renderFilters() {
