@@ -35,21 +35,34 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 });
 
+window.addEventListener('scroll', async () => {
+  const scrollTop = window.scrollY;
+  const windowHeight = window.innerHeight;
+  const docHeight = document.documentElement.scrollHeight;
+
+  // Déclenche quand on est à 200px du bas
+  if (scrollTop + windowHeight >= docHeight - 200 && !isLoading && currentPage < totalPages) {
+    await loadNextPage();
+  }
+});
+
 // ─── Fetch filters and render Cards ─────────────────────────────────────────────────
 async function fetchAndRender() {
-    const { data, error } = await rifboundApi.cards.getAll(activeFilters);
+    currentPage = 1;
 
+    const { data, error } = await rifboundApi.cards.getAll(activeFilters);
     if (error) {
       console.error('[cards] Erreur :', error);
       return;
     }   
 
+    totalPages = data.pagination.totalPages;
     renderCards(data.data);
     document.getElementById('result_count').textContent = `${data.pagination.total} cartes`;
 }
 
 // ─── Card Render ───────────────────────────────────────────────────────────────────
-function renderCard(card) {
+function renderCard(card, append = false) {
     let cardString = `<div class="card">
     <img src="${card.image_url}" alt="cardimg" style="object-fit: cover; width: 100%; display: block; aspect-ratio: 2/3;">
     <p>${card.name} - ${card.set.code}</p>
@@ -58,13 +71,13 @@ function renderCard(card) {
     return cardString;
 }
 
-function renderCards(cards) {
-    let container = document.getElementById('cards_container');
-    container.innerHTML = "";
+function renderCards(cards, append = false) {
+  const container = document.getElementById('cards_container');
+  if (!append) container.innerHTML = '';
 
-    cards.forEach(card => {
-        container.innerHTML += renderCard(card);
-    });
+  cards.forEach(card => {
+    container.innerHTML += renderCard(card);
+  });
 }
 
 // ─── Pills generator ─────────────────────────────────────────────────────────────────
@@ -108,4 +121,29 @@ async function renderFilters() {
     setContainer.innerHTML = data.data
         .map(set => `<span class="pill" data-filter="set" data-value="${set.code}">${set.code}</span>`)
         .join('');
+}
+
+// ─── Loading next page ─────────────────────────────────────────────────────────────────
+let currentPage = 1;
+let isLoading = false;
+let totalPages = null;
+
+async function loadNextPage(observer, sentinel) {
+  console.log('[loadNextPage]', { currentPage, totalPages, isLoading });
+  if (isLoading) return;
+  isLoading = true;
+
+  const { data, error } = await rifboundApi.cards.getAll({ ...activeFilters, page: currentPage + 1 });
+  if (error) {
+    console.error('[cards] Erreur :', error);
+    isLoading = false;
+    return;
+  }
+
+  renderCards(data.data, true);
+
+  currentPage++;
+  totalPages = data.pagination.totalPages;
+
+  isLoading = false;
 }
