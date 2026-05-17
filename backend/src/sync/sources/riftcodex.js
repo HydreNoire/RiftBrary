@@ -31,6 +31,15 @@ async function fetchCardsBySet(setCode) {
 
     const data = await res.json();
 
+    // Ajoute ça juste après
+    console.log(`[riftcodex] Réponse page ${page}:`, {
+      total: data.total,       // nombre total de cartes selon l'API
+      pages: data.pages,
+      itemsCount: data.items?.length,
+      firstCard: data.items?.[0]?.riftbound_id,
+      lastCard: data.items?.[data.items?.length - 1]?.riftbound_id,
+    });
+
     const items = data.items || [];
     const totalPages = data.pages || 1;
 

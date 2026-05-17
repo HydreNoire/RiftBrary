@@ -9,6 +9,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         const filter = pill.dataset.filter;
         const value = pill.dataset.value;
+
+        console.log('[filter click]', { filter, value, known: !!activeFilters[filter] });
         
         const index = activeFilters[filter].indexOf(value);
         if (index > -1) {
@@ -33,6 +35,7 @@ async function fetchAndRender() {
     }   
 
     renderCards(data.data);
+    document.getElementById('result_count').textContent = `${data.pagination.total} cartes`;
 }
 
 // ─── Card Render ───────────────────────────────────────────────────────────────────
@@ -57,14 +60,14 @@ function renderCards(cards) {
 // ─── Pills generator ─────────────────────────────────────────────────────────────────
 const FILTERS = {
     rarity: ['common', 'uncommon', 'rare', 'epic', 'showcase'],
-    type: ['unit', 'spell', 'equipment', 'landmark'],
-    domains: ['Fury', 'Calm', 'Mind', 'Body', 'Chaos', 'Order'],
+    type: ['unit', 'spell', 'item', 'legend', 'rune', 'battlefield'],
+    domain: ['Fury', 'Calm', 'Mind', 'Body', 'Chaos', 'Order'],
 }
 
 const activeFilters = {
     rarity: [],
     type: [],
-    domains: [],
+    domain: [],
     set: [],
 }
 
@@ -80,7 +83,7 @@ async function renderFilters() {
         .join('');
 
     const domainContainer = document.getElementById('pills_domains_container');
-    domainContainer.innerHTML = FILTERS.domains
+    domainContainer.innerHTML = FILTERS.domain
         .map(domain => `<span class="pill" data-filter="domain" data-value="${domain}">${domain}</span>`)
         .join('');
 

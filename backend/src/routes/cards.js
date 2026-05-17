@@ -21,9 +21,33 @@ router.get('/', async (req, res, next) => {
     };
 
     if (req.query.set) add(`set->>'code' = ?`, req.query.set.toUpperCase());
-    if (req.query.category) add('category = ?',      req.query.category.toLowerCase());
-    if (req.query.rarity) add('rarity = ?',        req.query.rarity.toLowerCase());
-    if (req.query.cost) add('energy_cost = ?',   parseInt(req.query.cost));
+    if (req.query.category) add('category = ?', req.query.category.toLowerCase());
+    if (req.query.rarity) {
+      const values = Array.isArray(req.query.rarity)
+        ? req.query.rarity.map(v => v.toLowerCase())
+        : [req.query.rarity.toLowerCase()];
+      params.push(values);
+      conditions.push(`rarity = ANY($${params.length})`);
+    }
+    if (req.query.cost) add('energy_cost = ?', parseInt(req.query.cost));
+    if (req.query.type) {
+      const values = Array.isArray(req.query.type)
+        ? req.query.type.map(v => v.toLowerCase())
+        : [req.query.type.toLowerCase()];
+      params.push(values);
+      conditions.push(`category = ANY($${params.length})`);
+    }
+    if (req.query.domain) {
+      params.push(req.query.domain.toLowerCase());
+      conditions.push(`
+        EXISTS (
+          SELECT 1 FROM card_domains cd
+          JOIN domains d ON cd.domain_id = d.id
+          WHERE cd.card_id = cards_full.id
+          AND LOWER(d.code) = $${params.length}
+        )
+      `);
+    }
     if (req.query.variant_type === 'base') {
       conditions.push('variant_type IS NULL');
     } else if (req.query.variant_type) {
