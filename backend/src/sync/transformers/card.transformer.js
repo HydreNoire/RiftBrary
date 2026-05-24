@@ -90,6 +90,7 @@ function transformCard(raw, setId) {
     energyCost: raw.attributes?.energy ?? null,
     might:      raw.attributes?.might  ?? null,
     abilityText: raw.text?.plain   ?? null,
+    abilityTextRich: raw.text?.rich  ?? null, 
     flavorText:  raw.text?.flavour ?? null,
     imageUrl:    raw.media?.image_url ?? null,
     artist:      raw.media?.artist    ?? null,

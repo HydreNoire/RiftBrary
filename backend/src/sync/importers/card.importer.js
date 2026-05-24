@@ -58,33 +58,34 @@ async function importCard(card, domainMap, baseCardIndex = new Map()) {
     const upsertResult = await client.query(
       `INSERT INTO cards (
         card_number, set_id, slug, name, category, rarity,
-        energy_cost, might, ability_text, flavor_text,
+        energy_cost, might, ability_text, flavor_text, ability_text_rich,
         image_url, artist, is_token, riot_card_id, last_synced_at,
         variant_type, base_card_id
-      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
+      ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)
       ON CONFLICT (set_id, card_number, variant_type) DO UPDATE SET
-        slug           = EXCLUDED.slug,
-        name           = EXCLUDED.name,
-        category       = EXCLUDED.category,
-        rarity         = EXCLUDED.rarity,
-        energy_cost    = EXCLUDED.energy_cost,
-        might          = EXCLUDED.might,
-        ability_text   = EXCLUDED.ability_text,
-        flavor_text    = EXCLUDED.flavor_text,
-        image_url      = EXCLUDED.image_url,
-        artist         = EXCLUDED.artist,
-        is_token       = EXCLUDED.is_token,
-        riot_card_id   = EXCLUDED.riot_card_id,
+        slug = EXCLUDED.slug,
+        name = EXCLUDED.name,
+        category = EXCLUDED.category,
+        rarity = EXCLUDED.rarity,
+        energy_cost = EXCLUDED.energy_cost,
+        might = EXCLUDED.might,
+        ability_text = EXCLUDED.ability_text,
+        ability_text_rich = EXCLUDED.ability_text_rich,
+        flavor_text = EXCLUDED.flavor_text,
+        image_url = EXCLUDED.image_url,
+        artist = EXCLUDED.artist,
+        is_token = EXCLUDED.is_token,
+        riot_card_id = EXCLUDED.riot_card_id,
         last_synced_at = EXCLUDED.last_synced_at,
-        variant_type   = EXCLUDED.variant_type,
-        base_card_id   = EXCLUDED.base_card_id,
-        updated_at     = NOW()
+        variant_type = EXCLUDED.variant_type,
+        base_card_id = EXCLUDED.base_card_id,
+        updated_at = NOW()
       RETURNING id, (xmax = 0) AS is_new`,
       [
         card.cardNumber, card.setId, card.slug, card.name,
         card.category, card.rarity,
         card.energyCost, card.might,
-        card.abilityText, card.flavorText,
+        card.abilityText, card.flavorText, card.abilityTextRich,
         card.imageUrl, card.artist,
         card.isToken, card.riotCardId, card.lastSyncedAt,
         card.variantType, baseCardId,

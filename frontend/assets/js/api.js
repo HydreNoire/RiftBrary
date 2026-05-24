@@ -70,6 +70,10 @@ const cards = {
   getById(id) {
     return apiFetch(`/cards/${id}`);
   },
+
+  getBySlug(slug) {
+    return apiFetch(`/cards/${slug}`);
+  },
 };
 
 // ─── Sets ───────────────────────────────────────────────────────────────────
