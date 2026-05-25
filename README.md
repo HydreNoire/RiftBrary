@@ -7,9 +7,9 @@ Bibliothèque de cartes, constructeur de deck, suivi de collection et règles du
 
 | Couche          | Technologie                  | Hébergement        |
 |-----------------|------------------------------|--------------------|
-| Frontend        | HTML / CSS / Vanilla JS      | Vercel (gratuit)   |
-| Backend API     | Node.js + Express            | Render (gratuit)   |
-| Base de données | PostgreSQL via Supabase      | Supabase (gratuit) |
+| Frontend        | HTML / CSS / Vanilla JS      | Vercel             |
+| Backend API     | Node.js + Express            | Render             |
+| Base de données | PostgreSQL via Supabase      | Supabase           |
 | Auth + Realtime | Supabase                     | Supabase           |
 
 ---
@@ -42,7 +42,7 @@ rifbound-tcg/
 
 ### Prérequis
 - Node.js ≥ 20 ([nodejs.org](https://nodejs.org))
-- Un compte [Supabase](https://supabase.com) (gratuit)
+- Un compte [Supabase](https://supabase.com)
 - Un compte [GitHub](https://github.com)
 
 ### 1 — Cloner et installer
@@ -109,8 +109,8 @@ Ou connecte le repo sur [vercel.com](https://vercel.com) → root directory = `f
 
 | Phase | Feature            | Statut      |
 |-------|--------------------|-------------|
-| 0     | Fondations & setup | ✅ En cours |
-| 1     | Bibliothèque cartes | 🔜 À faire  |
+| 0     | Fondations & setup | ✅ Fait |
+| 1     | Bibliothèque cartes | ▶️ En cours  |
 | 2     | Constructeur deck  | 🔜 À faire  |
 | 3     | Collection         | 🔜 À faire  |
 | 4     | Règles & Communauté | 🔜 À faire |
